@@ -1,0 +1,508 @@
+TITLE:: ClockWise
+summary:: A Controller Interconnection System
+categories:: External Control
+related:: Classes/MIDI, Classes/MIDIFunc, Classes/MIDIIn
+
+DESCRIPTION::
+ClockWise connects MIDI controllers to Synth parameters, and each other.
+Rather than program in terms of SC's event level API for controllers
+(link::Reference/MIDI::), ClockWise uses a concept that is similar to audio
+signals and busses: the control point. One or more controllers and synth
+args can be connected to a control point. When a control is activated, the
+other controls and synths connected to the same point are passed the event.
+Points are bi-directional, and changes can flow in any direction. This
+enables keeping controls in sync, no matter the source of any change.
+
+
+CLASSMETHODS::
+
+METHOD:: new
+Create a new control point system.
+
+ARGUMENT:: defaultNode
+The default node to be used in any call to link::#-synthArg:: without
+a specified node.
+
+returns:: A new instance of ClockWise.
+
+
+INSTANCEMETHODS::
+
+METHOD:: free
+Frees up all MIDI associations.
+
+
+METHOD:: defaultNode
+Return the default node to be used in any call to link::#-synthArg:: without
+a specified node.
+
+
+METHOD:: midiDevice
+Look for and prepare a MIDI device for use.
+
+ARGUMENT:: devName
+A short symbol to be used to identify this device in other calls.
+
+ARGUMENT:: devSearch
+The name of the device to use. This string need only be a substring of
+the actual device name. Compared case insensitively.
+
+ARGUMENT:: portSearch
+The optional name of the port to use. The string need only be a substring of
+the actual port name. Compared case insensitively. Be warned: USB MIDI
+devices often have different port names on Linux vs. OS X.
+
+DISCUSSION::
+
+code::
+c = ClockWise();
+c.midiDev(\nk, "nanoKontrol");
+c.midiDev(\lp, "Launchpad Pro", "Standalone");
+::
+
+
+SUBSECTION:: Scalar Controls
+
+Scalar controls have just a single numeric value.
+
+Commonly, the range of
+this value is [0 ~ 1]. In this case, the code::spec:: arguments indicate
+how to make from this range to the range of the control (or synth arg) being
+connected to the point.
+
+Other uses of scalar values are possible. For example, using just the
+integers [0 ~ 11] to mean a semittone. In these cases, the value is
+"unmapped".
+
+
+code::
+r = { |freq=256.0, speed=6, volume=0.3|
+    Ringz.ar(Impulse.ar(speed, 0, volume), freq, 0.5)
+}.play;
+
+(
+MIDIIn.connectAll;
+c = ClockWise(r);
+CmdPeriod.add(c);
+
+c.midiDevice(\nk, "nanoKontrol");
+
+c.synthArg(\freq, \midfreq.asSpec);
+c.midiCC(\freq, \nk, 0, 14, inOnly:true);
+
+c.synthArg(\speed, ControlSpec(1, 20));
+c.midiCC(\speed, \nk, 0, 15, inOnly:true);
+
+c.synthArg(\volume, \amp.asSpec);
+c.midiCC(\volume, \nk, 0, 2, inOnly:true);
+)
+::
+
+
+METHOD:: synthArg
+Connects an argument in a synth node to a point. When the point's value is set
+by any control, the synth arg will be set.
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: spec
+If provided, a link::Classes/ControlSpec:: that maps [0 ~ 1] into the range
+needed by the synth.
+
+ARGUMENT:: symbol
+The synth arg to connect. Defaults to the name of the point.
+
+ARGUMENT:: node
+Synth node to receive the value. Defaults to the node set in link::#*new::.
+
+
+
+METHOD:: midiCC
+Connect a MIDI CC to a control point.
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: dev
+Name of the MIDI device, as associated by link::#-midiDevice::.
+
+ARGUMENT:: ch
+MIDI channel number. Use code::nil:: for all channels.  soft::N.B.:: Like all MIDI
+channels in SC, this numbered 0 ~ 15.
+
+ARGUMENT:: cc
+CC number to connect. 0 ~ 127.
+
+ARGUMENT:: spec
+This specification is used to convert emphasis::to:: the MIDI range. It defaults
+to code::Control(0, 127, \lin, 1)::, mapping the scalar values between 0 and 1
+into the full MIDI range.
+
+ARGUMENT:: unmapped
+Set this to code::true:: if the scalar value and the MIDI CC value are the same.
+
+ARGUMENT:: inOnly
+Set this to code::true:: if only input from the control should be connected.
+
+ARGUMENT:: outOnly
+Set this to code::true:: if only output to the control should be connected.
+
+
+
+
+METHOD:: midiEncoder
+Connect a MIDI CC sent by an encoder. Encoders send positive or negative
+deltas as they are turned. These controls will only change the value of a
+point after the value has been set at least once by some other means, for
+example, using link::#synthArg::.
+
+Supports only (for now) encoders that send 1, 2, ... for positive, and
+127, 126, 125... for negative. These are then normalized to 1, 2, ... and -1,
+-2, -3 ..., and multiplied by code::increment:: before being added to the
+current point scalar value.
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: dev
+Name of the MIDI device, as associated by link::#-midiDevice::.
+
+ARGUMENT:: ch
+MIDI channel number. Use code::nil:: for all channels.
+soft::N.B.:: Like all MIDI channels in SC, this numbered 0 ~ 15.
+
+ARGUMENT:: cc
+CC number to connect. 0 ~ 127.
+
+ARGUMENT:: increment
+Amount to multiple the normalized delata
+ARGUMENT:: inOnly
+Set this to code::true:: if only input from the control should be connected.
+
+ARGUMENT:: outOnly
+Set this to code::true:: if only output to the control should be connected.
+
+
+
+METHOD:: midiBend
+Connect MIDI pitch bend to a point.
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: dev
+Name of the MIDI device, as associated by link::#-midiDevice::.
+
+ARGUMENT:: ch
+MIDI channel number. Use code::nil:: for all channels.
+soft::N.B.:: Like all MIDI channels in SC, this numbered 0 ~ 15.
+
+ARGUMENT:: spec
+This specification is used to convert emphasis::to:: the MIDI range. It defaults
+to code::Control(0, 16r3fff, \lin, 1)::, mapping the scalar values between 0 and 1
+into the full MIDI range. Thus, the resting middle position of a pitch bend
+wheel will be map to 0.5.
+
+ARGUMENT:: unmapped
+Set this to code::true:: if the scalar value and the MIDI CC value are the same.
+
+ARGUMENT:: inOnly
+Set this to code::true:: if only input from the control should be connected.
+
+ARGUMENT:: outOnly
+Set this to code::true:: if only output to the control should be connected.
+
+
+
+
+SUBSECTION:: Buttons
+Buttons on controllers usually map to notes, but may map to CCs. In either
+case a velocity of non-zero means it is depressed, and zero or note off
+means released.
+
+Buttons may be specified by code::note:: or code::cc::, though not both.
+
+
+METHOD:: midiRadioButton
+A radio button selects a particular value on a scalar point. When the
+button is pressed, the value will be sent to the point. Since many buttons
+have lights, this connection sets the light on whenever the point has the
+value, and off otherwise.
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: value
+The value of the point that this button represents.
+
+ARGUMENT:: dev
+Name of the MIDI device, as associated by link::#-midiDevice::.
+
+ARGUMENT:: ch
+MIDI channel number. Use code::nil:: for all channels.
+soft::N.B.:: Like all MIDI channels in SC, this numbered 0 ~ 15.
+
+ARGUMENT:: note
+Midi note number to connect. 0 ~ 127.
+
+ARGUMENT:: cc
+CC number to connect. 0 ~ 127.
+
+ARGUMENT:: inOnly
+Set this to code::true:: if only input from the control should be connected.
+
+ARGUMENT:: outOnly
+Set this to code::true:: if only output to the control should be connected.
+
+
+
+
+METHOD:: midiTriggerButton
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: dev
+Name of the MIDI device, as associated by link::#-midiDevice::.
+
+ARGUMENT:: ch
+MIDI channel number. Use code::nil:: for all channels.
+soft::N.B.:: Like all MIDI channels in SC, this numbered 0 ~ 15.
+
+ARGUMENT:: note
+Midi note number to connect. 0 ~ 127.
+
+ARGUMENT:: cc
+CC number to connect. 0 ~ 127.
+
+ARGUMENT:: inOnly
+Set this to code::true:: if only input from the control should be connected.
+
+ARGUMENT:: outOnly
+Set this to code::true:: if only output to the control should be connected.
+
+
+
+
+
+
+
+SUBSECTION:: Utilities
+
+
+
+
+METHOD:: set
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: nv
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: sync
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+returns:: (describe returnvalue here)
+
+
+METHOD:: syncAll
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+
+SUBSECTION:: Sanity
+
+METHOD:: sane
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+returns:: (describe returnvalue here)
+
+METHOD:: saneAll
+(describe method here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: saneValue
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: v
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: triggerSane
+(describe method here)
+
+ARGUMENT:: trigSym
+(describe argument here)
+
+ARGUMENT:: destSyms
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+
+
+METHOD:: midiProgram
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: dev
+(describe argument here)
+
+ARGUMENT:: ch
+(describe argument here)
+
+ARGUMENT:: inOnly
+(describe argument here)
+
+ARGUMENT:: outOnly
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: select
+(describe method here)
+
+ARGUMENT:: commonPt
+(describe argument here)
+
+ARGUMENT:: selectorPt
+(describe argument here)
+
+ARGUMENT:: muxPts
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: warp
+(describe method here)
+
+ARGUMENT:: basePt
+(describe argument here)
+
+ARGUMENT:: warpPt
+(describe argument here)
+
+ARGUMENT:: spec
+(describe argument here)
+
+ARGUMENT:: mul
+(describe argument here)
+
+ARGUMENT:: add
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+METHOD:: tempoClock
+(describe method here)
+
+ARGUMENT:: tempoPt
+(describe argument here)
+
+ARGUMENT:: clockPt
+(describe argument here)
+
+ARGUMENT:: clock
+(describe argument here)
+
+
+METHOD:: midiClock
+(describe method here)
+
+ARGUMENT:: pt
+(describe argument here)
+
+ARGUMENT:: dev
+(describe argument here)
+
+ARGUMENT:: inOnly
+(describe argument here)
+
+ARGUMENT:: outOnly
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+
+
+METHOD:: midiPerf
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: dev
+(describe argument here)
+
+ARGUMENT:: ch
+(describe argument here)
+
+ARGUMENT:: inOnly
+(describe argument here)
+
+ARGUMENT:: outOnly
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+
+
+METHOD:: action
+(describe method here)
+
+ARGUMENT:: pt
+Name of the point (a link::Classes/Symbol::).
+
+ARGUMENT:: a
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+METHOD:: getMidiOut
+(describe method here)
+
+ARGUMENT:: dev
+(describe argument here)
+
+ARGUMENT:: skip
+(describe argument here)
+
+returns:: (describe returnvalue here)
+
+
+
+
+PRIVATE:: cmdPeriod
+PRIVATE:: getMidiIn
+PRIVATE:: point
+
+EXAMPLES::
+
+
+code::
+(some example code)
+::

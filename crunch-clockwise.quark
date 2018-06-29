@@ -1,0 +1,12 @@
+(
+    name: "crunch-clockwise",
+    summary: "This is a library for connecting MIDI controllers and devices with a SuperCollider patch, and with each other.",
+    version: "0.1.0",
+
+    author: "Mark Lentczner",
+    copyright: "Mark Lentczner, 2018",
+    license: "BSD3",
+
+    schelp: "ClockWise",
+    dependencies: [],
+)

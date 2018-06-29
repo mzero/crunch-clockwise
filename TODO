@@ -1,0 +1,79 @@
+=== TODO ===
+
+[] automatic init of MIDI?
+    this is enough:
+        MIDIIn.connectAll;
+    but you need this if you want to force it:
+        MIDIClient.init;
+        MIDIIn.connectAll;
+
+[] automatic registration with CmdPeriod?
+        CmdPeriod.add(this)
+
+[] call .asSpec on spec arguments
+
+
+[] inOnly and outOnly for midiDevice()
+
+[] point names don't have to be symbols
+    [\mute, 3]
+
+
+[] CWEncode should inherit from CWCc
+    [] Perhaps CWBend should, too
+[] CWCc should have a raw argument
+
+[] "no out" optimization in Point (add to separate list)
+[] figure out way to restart clearing previous connections
+
+
+=== FUTURE ===
+
+[] settable "on" value for buttons (some devices take 1, not 127... others
+    the value sets the color)
+
+[] GUI elements
+    [] like MIDI elements
+    [] utility to generate from Points?
+    [] does the range/type info need to move to Point?
+
+
+[] CWSelect keys? currently integers from 0
+
+[] periodic readback from synth args and update if changed
+[] trace facility in point
+[] trace items!
+
+[] support different types of relative ccs
+
+
+
+=== NOTES ====
+[] relative ccs
+                    -2      -1      0       1       2
+        2s comp:   126     127      0       1       2
+        offset:     62      63     64      65      66
+        sign bit:   66      65    0/64      1       2
+
+    -from Ableton-
+
+    ENCODER_VALUE_NORMALIZER = {
+        _map_modes.relative_smooth_two_compliment:  lambda v: (v if v <= 64 else v - 128),
+        _map_modes.relative_smooth_signed_bit:      lambda v: (v if v <= 64 else 64 - v),
+        _map_modes.relative_smooth_binary_offset:   lambda v: v - 64
+    }
+
+
+[] Button -> RadioButton (vel > 0 is on, no off)
+    [] and have ToggleButton (vel > 0 toggles on/off, no way to reflect state)
+    [] and have StateButton(?) (vel > 0 is on, vel = 0 is off, reflects state)
+
+
+            Note On         Note Off            Set(w)
+
+    Radio   set(v)          -                   if (w==v) note on, else note off
+    Trigger trigger         -                   note on, note off 150ms later?
+    Button  set(1)          set(0)              if (w>0) note on, else note off
+    Toggle  set(!s)         -                   s=w
+
+
