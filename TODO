@@ -13,10 +13,17 @@
 [] call .asSpec on spec arguments
 
 
-[] inOnly and outOnly for midiDevice()
+[x] inOnly and outOnly for midiDevice()
 
 [] point names don't have to be symbols
     [\mute, 3]
+
+[] for synthArg, use ControlSpec from SynthDef if exists
+    - You can get the SynthDesc from a node by doing something
+      like `SynthDescLib.match(node.defName)`.
+
+
+[] support for alternate port names on Linux
 
 
 [] CWEncode should inherit from CWCc

@@ -32,16 +32,16 @@ MIDIIn.connectAll;
 c = ClockWise(r);
 CmdPeriod.add(c);
 
-c.midiDevice(\nk, "nanoKontrol");
+c.midiDevice(\nk, "nanoKontrol", inOnly:true);
 
 c.synthArg(\freq, \midfreq.asSpec);
-c.midiCC(\freq, \nk, 0, 14, inOnly:true);
+c.midiCC(\freq, \nk, 0, 14);
 
 c.synthArg(\speed, ControlSpec(1, 20));
-c.midiCC(\speed, \nk, 0, 15, inOnly:true);
+c.midiCC(\speed, \nk, 0, 15);
 
 c.synthArg(\volume, \amp.asSpec);
-c.midiCC(\volume, \nk, 0, 2, inOnly:true);
+c.midiCC(\volume, \nk, 0, 2);
 )
 ```
 

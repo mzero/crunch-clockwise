@@ -14,7 +14,7 @@ ClockWise {
 
     cmdPeriod { this.free; }
 
-    midiDevice { |devName, devSearch, portSearch=nil|
+    midiDevice { |devName, devSearch, portSearch=nil, inOnly=false, outOnly=false|
         var find = { | dir, list, action |
             var found = false;
             list.do { |ep, i|
@@ -32,14 +32,18 @@ ClockWise {
             };
         };
 
-        find.("in ", MIDIClient.sources)
-            { |ep, i| midiInIds.put(devName, ep.uid); };
-        find.("out", MIDIClient.destinations)
-        { |ep, i|
-            var m = MIDIOut(i, ep.uid);
-            m.latency = 0;
-            m.connect(ep.uid);
-            midiOuts.put(devName, m);
+        if (outOnly.not) {
+            find.("in ", MIDIClient.sources)
+                { |ep, i| midiInIds.put(devName, ep.uid); };
+        };
+        if (inOnly.not) {
+            find.("out", MIDIClient.destinations)
+            { |ep, i|
+                var m = MIDIOut(i, ep.uid);
+                m.latency = 0;
+                m.connect(ep.uid);
+                midiOuts.put(devName, m);
+            };
         };
     }
 
