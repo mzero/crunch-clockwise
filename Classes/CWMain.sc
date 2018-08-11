@@ -16,25 +16,27 @@ ClockWise {
 
     midiDevice { |devName, devSearch, portSearch=nil, inOnly=false, outOnly=false|
         var find = { | dir, list, action |
-            var found = false;
-            list.do { |ep, i|
-                if (found.not) {
-                    if (ep.device.containsi(devSearch)
-                        && (portSearch !? ep.name.containsi(_) ? true)) {
-                        found = true;
-                        action.value(ep, i);
-                        "midiDevice %/% is %".format(devName, dir, ep).postln;
-                    };
-                };
+            var found = list.detectIndex { |ep, i|
+                ep.device.containsi(devSearch)
+                && (portSearch !? ep.name.containsi(_) ? true)
             };
-            if (found.not) {
+            if (found.isNil) {
                 "midiDevice %/% no match found".format(devName, dir).postln;
+            } {
+                var ep = list.at(found);
+                action.value(ep, found);
+                "midiDevice %/% is %".format(devName, dir, ep).postln;
             };
         };
 
+        MIDIIn.connectAll;  // always safe to call!
+
         if (outOnly.not) {
             find.("in ", MIDIClient.sources)
-                { |ep, i| midiInIds.put(devName, ep.uid); };
+            { |ep, i|
+                MIDIIn.connect(i, ep);
+                midiInIds.put(devName, ep.uid);
+            };
         };
         if (inOnly.not) {
             find.("out", MIDIClient.destinations)
