@@ -85,13 +85,23 @@ CWBend : CWControl {
 CWEncoder : CWControl {
     // A MIDI CC control from an encoder
 
-    var midiFunc, midiSend, lastValue, increment;
+    var midiFunc, midiSend, lastValue, increment, decode;
 
-    *new { |point, devId, midiOut, ch, cc, increment=1 |
-        ^super.new().initEncoder(point, devId, midiOut, ch, cc, increment)
+    *new { |point, devId, midiOut, ch, cc, increment=1, mode=\universal |
+        ^super.new().initEncoder(point, devId, midiOut, ch, cc, increment, mode)
     }
-    initEncoder { |point, devId, midiOut, ch, cc, incrementArg|
+    initEncoder { |point, devId, midiOut, ch, cc, incrementArg, mode|
         increment = incrementArg;
+        decode = switch(mode ? \common,
+            \twosComp,  { { |cv| if (cv <= 64) { cv } { cv - 128 } } },
+            \offset,    { { |cv| cv - 64 } },
+            \signBit,   { { |cv| (cv & 0x3f) & if(cv < 64, 1, -1) } },
+            \universal, { { |cv|
+                case { cv < 32 } { cv }
+                     { cv < 96 } { cv - 64 }
+                     { true }    { cv - 128 }
+                } }
+            );
 
         if (devId.isNil.not) {
             midiFunc = MIDIFunc.cc(
@@ -111,7 +121,7 @@ CWEncoder : CWControl {
 
     set { |v| lastValue = v; }
     adjust { |cv|
-        var delta = increment * (if (cv <= 64) { cv } { cv - 128 });
+        var delta = increment * decode.value(cv);
 
         lastValue = lastValue !? (_ + delta);
         lastValue !? this.send(\set, _);

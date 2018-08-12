@@ -157,11 +157,6 @@ deltas as they are turned. These controls will only change the value of a
 point after the value has been set at least once by some other means, for
 example, using link::#synthArg::.
 
-Supports only (for now) encoders that send 1, 2, ... for positive, and
-127, 126, 125... for negative. These are then normalized to 1, 2, ... and -1,
--2, -3 ..., and multiplied by code::increment:: before being added to the
-current point scalar value.
-
 ARGUMENT:: pt
 Name of the point (a link::Classes/Symbol::).
 
@@ -177,6 +172,19 @@ CC number to connect. 0 ~ 127.
 
 ARGUMENT:: increment
 Amount to multiple the normalized delata
+
+ARGUMENT:: mode
+Selects the style of what the controller sends for clockwise and counter-clockwise turns:
+
+code::\twosComp:: - cw sends 1, 2, 3; ccw sends 127, 126, 125
+
+code::\offset:: - cw sends 65, 66, 67; ccw sends 63, 62, 61
+
+code::\signBit:: - cw sends 1, 2, 3; ccw sends 65, 66, 67
+
+code::\universal:: - the default, works with most encoders, (it does twos
+compliment or offset based on the actual values sent).
+
 ARGUMENT:: inOnly
 Set this to code::true:: if only input from the control should be connected.
 
