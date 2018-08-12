@@ -120,6 +120,7 @@ if (~pbj.isNil.not) {
 
 		~cw = {
 			var cw = ClockWise(~pbj);
+			CmdPeriod.add(cw);
 
 			cw.midiDevice(\ff, "FaderFox");
 			cw.midiDevice(\dt, "Digitakt");
@@ -304,52 +305,84 @@ if (~pbj.isNil.not) {
 
 			// Timers
 
-			(1..2).do { |i|
-				var symMin = "t%min".format(i).asSymbol;
-				var symSec = "t%sec".format(i).asSymbol;
-				var symRst = "t%rst".format(i).asSymbol;
-				var symRun = "t%run".format(i).asSymbol;
+			{
+				var t1running = false;
 
-				var timer = 0;
-				var running = true;
+				var t2 = 0;
+				var t2running = true;
 
-				var ffNum = 124 + (2 * (i - 1));
+				var setUpTime = { |sym, minCC, secCC|
+					var minSym = (sym.asString ++ "min").asSymbol;
+					var secSym = (sym.asString ++ "sec").asSymbol;
 
-				var update = { |t|
-					timer = t;
-					cw.set(symMin, (timer / 60).floor);
-					cw.set(symSec, timer % 60);
+					cw.action(sym, { |t|
+						if (t >= 0) {
+							cw.set(minSym, (t / 60).floor);
+							cw.set(secSym, t % 60);
+						} {
+							cw.set(minSym, 100);
+							cw.set(secSym, 100);
+						}
+					});
+
+					cw.midiCC(minSym, \ff, 12, minCC, unmapped:true, outOnly:true);
+					cw.midiCC(secSym, \ff, 12, secCC, unmapped:true, outOnly:true);
 				};
 
-				cw.midiCC(symMin, \ff, 12, ffNum, unmapped:true);
-				cw.midiCC(symSec, \ff, 12, ffNum+1, unmapped:true);
+				var update = { |blink=false|
+					cw.set(\t1,
+						if(s.recorder.isRecording && (t1running || blink),
+						   s.recorder.duration,
+						   -1));
+					cw.set(\t2,
+						if(t2running || blink,
+						t2,
+						-1));
+				};
 
-				cw.midiTriggerButton(symRst, \ff, 12, ffNum);
-				cw.action(symRst, { update.value(0); });
+				setUpTime.value(\t1, 124, 125);
+				setUpTime.value(\t2, 126, 127);
 
-				cw.midiTriggerButton(symRun, \ff, 12, ffNum+1);
-				cw.action(symRun, { running = running.not; });
+
+
+				cw.midiTriggerButton(\t1reset, \ff, 12, 124, inOnly:true);
+				cw.action(\t1reset, {
+					s.stopRecording;
+					t1running = false;
+					update.value;
+				});
+
+				cw.midiTriggerButton(\t1run, \ff, 12, 125, inOnly:true);
+				cw.action(\t1run, {
+					t1running = t1running.not;
+					if (t1running)
+						{ s.record; }
+						{ s.pauseRecording; };
+					update.value;
+				});
+
+				cw.midiTriggerButton(\t2reset, \ff, 12, 126, inOnly:true);
+				cw.midiProgram(\t2reset, \dt, 13, inOnly:true);
+				cw.action(\t2reset, { t2 = 0; update.value; });
+
+				cw.midiTriggerButton(\t2run, \ff, 12, 127, inOnly:true);
+				cw.action(\t2run, { t2running = t2running.not; update.value; });
 
 				SystemClock.sched(0, Routine({
+					var blink = true;
+					3.yield;
+
 					loop {
-						if (running) { update.value(timer + 1); };
+						if (t2running) { t2 = t2 + 1 };
+						blink = blink.not;
+						update.value(blink);
 						1.yield;
 					}
 				}));
 
-				update.value(0);
-			};
+				update.value;
 
-			cw.midiProgram(\t2rst, \dt, 13);
-
-			cw.midiRadioButton(\recording, 0, \ff, 12, 6);
-			cw.midiRadioButton(\recording, 1, \ff, 12, 7);
-			cw.action(\recording, { |v|
-				if (v == 1)
-					{ s.record; }
-					{ s.stopRecording; };
-				"recording %, on %".format(s.isRecording, s.recorder.path).postln;
-			});
+			}.value;
 
 			cw;
 		}.value;
