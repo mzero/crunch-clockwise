@@ -1,5 +1,24 @@
 === TODO ===
 
+[x] offset encoders
+
+
+[] CWEncode should inherit from CWCc
+    [] Perhaps CWBend should, too
+[] CWCc should have a raw argument
+
+[] it isn't obvious that "sane" value is needed with midiEncoder
+    [] auto sane on encoder input?
+
+[] trace facility
+    [] trace points
+    [] trace raw midi in/out
+
+[] send a SysEx on trigger? midiSysEx?
+
+
+
+
 [] automatic init of MIDI?
     this is enough:
         MIDIIn.connectAll;
@@ -12,9 +31,6 @@
 
 [] call .asSpec on spec arguments
 
-
-[x] inOnly and outOnly for midiDevice()
-
 [] point names don't have to be symbols
     [\mute, 3]
 
@@ -25,16 +41,14 @@
 
 [] support for alternate port names on Linux
 
-
-[] CWEncode should inherit from CWCc
-    [] Perhaps CWBend should, too
-[] CWCc should have a raw argument
-
 [] "no out" optimization in Point (add to separate list)
 [] figure out way to restart clearing previous connections
 
-
 === FUTURE ===
+
+[] Reconnect feature: Remember all midiDevice assignments that couldn't be
+   made, re-init MIDIClient and then remake everything
+   [] will need some form of MIDI In/Out proxying
 
 [] settable "on" value for buttons (some devices take 1, not 127... others
     the value sets the color)

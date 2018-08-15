@@ -118,6 +118,12 @@ ClockWise {
             ch);
     }
 
+    synthPerf { |pt, synth|
+        CWSynthPerf(
+            this.point(pt),
+            synth);
+    }
+
     midiProgram { |pt, dev, ch, inOnly=false, outOnly=false|
         CWProgram(
             this.point(pt),
