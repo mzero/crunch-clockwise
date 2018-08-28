@@ -119,9 +119,10 @@ ClockWise {
     }
 
     synthPerf { |pt, synth|
-        CWSynthPerf(
+        var s = CWSynthPerf(
             this.point(pt),
             synth);
+        ^s.group;
     }
 
     midiProgram { |pt, dev, ch, inOnly=false, outOnly=false|
