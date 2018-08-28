@@ -29,12 +29,20 @@ ClockWise {
             };
         };
 
-        MIDIIn.connectAll;  // always safe to call!
+        if (MIDIClient.initialized.not) {
+			MIDIClient.init();
+		};
 
         if (outOnly.not) {
             find.("in ", MIDIClient.sources)
             { |ep, i|
-                MIDIIn.connect(i, ep);
+                try {
+					MIDIIn.connect(i, ep)
+				} { |err|
+					if (err.isKindOf(PrimitiveFailedError)) 
+						{ "You can ignore that error message.".postln; }
+						{ err.throw; };
+				};
                 midiInIds.put(devName, ep.uid);
             };
         };
@@ -43,7 +51,13 @@ ClockWise {
             { |ep, i|
                 var m = MIDIOut(i, ep.uid);
                 m.latency = 0;
-                m.connect(ep.uid);
+				try {
+					m.connect(ep.uid);
+				} { |err|
+					if (err.isKindOf(PrimitiveFailedError)) 
+						{ "You can ignore that error message.".postln; }
+						{ err.throw; };
+				};
                 midiOuts.put(devName, m);
             };
         };
