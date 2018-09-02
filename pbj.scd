@@ -199,9 +199,9 @@ if (~pbj.isNil.not) {
 			cw.synthArg(\revLevel);  // but it doesn't give as fine a control
 			cw.synthArg(\dlyLevel);  // over the extreme end, which in this case
 			cw.synthArg(\outLevel);  // is more useful
-			cw.midiCC(\dryLevel,  \ff, 12, 11, ControlSpec(127, 0));
 			cw.midiCC(\revLevel,  \ff, 12, 12);
 			cw.midiCC(\dlyLevel,  \ff, 12, 13);
+			cw.midiCC(\dryLevel,  \ff, 12, 14, ControlSpec(127, 0));
 			cw.midiCC(\outLevel,  \ff, 12, 15);
 
 
@@ -213,7 +213,6 @@ if (~pbj.isNil.not) {
 				cw.midiCC(sym, \dt, i, 95);
 				cw.saneValue(sym, 100/127);
 			};
-
 
 			// MIDI Performance Router
 
@@ -268,12 +267,6 @@ if (~pbj.isNil.not) {
 			(0..3).do { |i|
 				var ch = 9 - 1 + i;  // channels 9 ~ 12, numbered from 0
 
-				// volume
-				var volSym = "fm-%-vol".format(i).asSymbol;
-				cw.midiCC(volSym, \ff, ch, 73);
-				cw.midiCC(volSym, \fm, ch, 73);
-				cw.saneValue(volSym, 100/127);  // nominal volume level
-
 				// performance parameters
 				(0..3).do { |p|
 					var perfSym = "fm-%-perf-%".format(i, p).asSymbol;
@@ -284,6 +277,15 @@ if (~pbj.isNil.not) {
 				};
 			};
 
+			// Synth Volume Levels
+
+			(8..11).do { |i|                 // channels 9 ~ 12, numbered from 0
+				var sym = "synVol%".format(i).asSymbol;
+				cw.midiCC(sym, \ff, 12, i);  // faders 9 thru 12
+				cw.midiCC(sym, \mm, i, 7);   // standard volume CC
+				cw.midiCC(sym, \fm, i, 73);  // output volume CC on PreenFM
+				cw.saneValue(sym, 100/127);  // nominal volume level
+			};
 
 			// Tempo & Clock
 
