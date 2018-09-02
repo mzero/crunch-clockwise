@@ -69,13 +69,15 @@ CWRadioButton : CWButtonBase {
     // The state of the controll will be reflected back as a vel 0 or 127.
     // Note: This kind of button cannot be "turned off" directly.
 
-    var value, active;
+    var value, orGreater, active;
 
-    *new { |point, value, devId, midiOut, ch, note=nil, cc=nil |
-        ^super.new(point, devId, midiOut, ch, note, cc).initRadioButton(value)
+    *new { |point, value, devId, midiOut, ch, note=nil, cc=nil, orGreater=false|
+        ^super.new(point, devId, midiOut, ch, note, cc)
+            .initRadioButton(value, orGreater)
     }
-    initRadioButton { |value_|
+    initRadioButton { |value_, orGreater_|
         value = value_;
+        orGreater = orGreater_;
         active = false;
     }
 
@@ -93,7 +95,7 @@ CWRadioButton : CWButtonBase {
     }
 
     set { |v|
-        active = v == value;
+        active = if(orGreater, v >= value, v == value);
         this.outputButton(active);
     }
 }

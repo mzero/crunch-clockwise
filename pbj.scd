@@ -112,8 +112,10 @@ if (~pbj.isNil.not) {
 			var eqH = BHiShelf.ar(eqM, hiFreq, db:(hiGainDb - midGainDb));
 
 			var eqAll = eqH;
+			var out = eqAll * outLevel;
 
-			Out.ar(0,  eqAll * outLevel);
+			Out.ar(0,  out);
+			SendPeakRMS.ar(max(out[0], out[1]), 2, 1, "/outMeter");
 		}.play;
 
 		~server.sync;
@@ -255,6 +257,12 @@ if (~pbj.isNil.not) {
 			cw.midiPerf(\perfOut2, \dt, 10, inOnly:true);
 			cw.midiPerf(\perfOut3, \dt, 11, inOnly:true);
 
+			// Output meter
+			cw.midiRadioButton(\outMeter, -35.0, \ff, 12, note:8, outOnly:true, orGreater:true);
+			cw.midiRadioButton(\outMeter, -15.0, \ff, 12, note:9, outOnly:true, orGreater:true);
+			cw.midiRadioButton(\outMeter,  -9.0, \ff, 12, note:10, outOnly:true, orGreater:true);
+			cw.midiRadioButton(\outMeter,  -3.0, \ff, 12, note:11, outOnly:true, orGreater:true);
+
 			// Preen Instruments
 
 			(0..3).do { |i|
@@ -390,6 +398,14 @@ if (~pbj.isNil.not) {
 		1.sleep;
 		~cw.syncAll;
 
+		{
+			var cw = ~cw;
+			~meterOsc = OSCFunc({|msg|
+				var peakdb = msg[3].ampdb;
+				cw.set(\outMeter, peakdb);
+			}, "/outMeter");
+		}.value;
+
 	}).play;
 
 	~metro.playNextBar(Routine({
@@ -405,6 +421,7 @@ if (~pbj.isNil.not) {
 	}));
 
 	~freeUp = { | self |
+		self.outMeter.free;
 		self.cw.free;
 		self.cw = nil;
 		self.efx.free;

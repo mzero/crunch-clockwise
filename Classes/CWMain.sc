@@ -107,13 +107,13 @@ ClockWise {
             ch, cc, increment, mode);
     }
 
-    midiRadioButton { |pt, value, dev, ch, note=nil, cc=nil, inOnly=false, outOnly=false|
+    midiRadioButton { |pt, value, dev, ch, note=nil, cc=nil, inOnly=false, outOnly=false, orGreater=false|
         CWRadioButton(
             this.point(pt),
             value,
             this.getMidiIn(dev, skip:outOnly),
             this.getMidiOut(dev, skip:inOnly),
-            ch, note, cc);
+            ch, note, cc, orGreater);
     }
 
     midiTriggerButton { |pt, dev, ch, note=nil, cc=nil, inOnly=false, outOnly=false|
