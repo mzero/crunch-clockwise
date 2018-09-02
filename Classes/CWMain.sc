@@ -30,19 +30,19 @@ ClockWise {
         };
 
         if (MIDIClient.initialized.not) {
-			MIDIClient.init();
-		};
+            MIDIClient.init();
+        };
 
         if (outOnly.not) {
             find.("in ", MIDIClient.sources)
             { |ep, i|
                 try {
-					MIDIIn.connect(i, ep)
-				} { |err|
-					if (err.isKindOf(PrimitiveFailedError)) 
-						{ "You can ignore that error message.".postln; }
-						{ err.throw; };
-				};
+                    MIDIIn.connect(i, ep)
+                } { |err|
+                    if (err.isKindOf(PrimitiveFailedError))
+                        { "You can ignore that error message.".postln; }
+                        { err.throw; };
+                };
                 midiInIds.put(devName, ep.uid);
             };
         };
@@ -51,13 +51,13 @@ ClockWise {
             { |ep, i|
                 var m = MIDIOut(i, ep.uid);
                 m.latency = 0;
-				try {
-					m.connect(ep.uid);
-				} { |err|
-					if (err.isKindOf(PrimitiveFailedError)) 
-						{ "You can ignore that error message.".postln; }
-						{ err.throw; };
-				};
+                try {
+                    m.connect(ep.uid);
+                } { |err|
+                    if (err.isKindOf(PrimitiveFailedError))
+                        { "You can ignore that error message.".postln; }
+                        { err.throw; };
+                };
                 midiOuts.put(devName, m);
             };
         };
