@@ -84,14 +84,21 @@ CWBend : CWControl {
 
 CWEncoder : CWControl {
     // A MIDI CC control from an encoder
+    // Spec provides limits and increment, but isn't used for mapping directly.
 
-    var midiFunc, midiSend, lastValue, increment, decode;
+    classvar stdSpec;
+    var midiFunc, midiSend, lastValue, spec, decode;
 
-    *new { |point, devId, midiOut, ch, cc, increment=1, mode=\universal |
-        ^super.new().initEncoder(point, devId, midiOut, ch, cc, increment, mode)
+    *initClass {
+        Class.initClassTree(Warp);
+        stdSpec = ControlSpec.new(0, 1, \lin, 1/127);
     }
-    initEncoder { |point, devId, midiOut, ch, cc, incrementArg, mode|
-        increment = incrementArg;
+    *new { |point, devId, midiOut, ch, cc, spec = nil, mode=\universal |
+        ^super.new().initEncoder(point, devId, midiOut, ch, cc, spec, mode)
+    }
+    initEncoder { |point, devId, midiOut, ch, cc, specArg, mode|
+        spec = specArg ?? stdSpec;
+
         decode = switch(mode ? \common,
             \twosComp,  { { |cv| if (cv <= 64) { cv } { cv - 128 } } },
             \offset,    { { |cv| cv - 64 } },
@@ -121,9 +128,9 @@ CWEncoder : CWControl {
 
     set { |v| lastValue = v; }
     adjust { |cv|
-        var delta = increment * decode.value(cv);
+        var delta = spec.step * decode.value(cv);
 
-        lastValue = lastValue !? (_ + delta);
+        lastValue = lastValue !? (_ + delta).max(spec.clipLo).min(spec.clipHi);
         lastValue !? this.send(\set, _);
     }
 }

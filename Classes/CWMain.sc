@@ -99,12 +99,12 @@ ClockWise {
             ch, spec, unmapped);
     }
 
-    midiEncoder { |pt, dev, ch, cc, increment, mode=\universal, inOnly=false, outOnly=false|
+    midiEncoder { |pt, dev, ch, cc, spec = nil, mode=\universal, inOnly=false, outOnly=false|
         CWEncoder(
             this.point(pt),
             this.getMidiIn(dev, skip:outOnly),
             this.getMidiOut(dev, skip:inOnly),
-            ch, cc, increment, mode);
+            ch, cc, spec, mode);
     }
 
     midiRadioButton { |pt, value, dev, ch, note=nil, cc=nil, inOnly=false, outOnly=false|
