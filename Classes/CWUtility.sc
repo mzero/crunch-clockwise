@@ -13,7 +13,7 @@ CWSelect : CWControl {
         muxPoints.do { |p, i|
             this.connect(p, i);
         };
-        self.set(0);
+        this.set(0);
     }
 
     receiveId { |id, msg, args|
