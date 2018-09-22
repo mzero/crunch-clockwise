@@ -39,7 +39,7 @@ ClockWise {
                 try {
 					MIDIIn.connect(i, ep)
 				} { |err|
-					if (err.isKindOf(PrimitiveFailedError)) 
+					if (err.isKindOf(PrimitiveFailedError))
 						{ "You can ignore that error message.".postln; }
 						{ err.throw; };
 				};
@@ -54,7 +54,7 @@ ClockWise {
 				try {
 					m.connect(ep.uid);
 				} { |err|
-					if (err.isKindOf(PrimitiveFailedError)) 
+					if (err.isKindOf(PrimitiveFailedError))
 						{ "You can ignore that error message.".postln; }
 						{ err.throw; };
 				};
@@ -145,6 +145,12 @@ ClockWise {
             this.getMidiIn(dev, skip:outOnly),
             this.getMidiOut(dev, skip:inOnly),
             ch);
+    }
+
+    sysex { |dev, callback|
+        CWSysex(
+            this.getMidiIn(dev),
+            callback);
     }
 
     tempoClock { |tempoPt, clockPt, clock|

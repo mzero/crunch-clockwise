@@ -160,5 +160,21 @@ CWProgram : CWControl {
     trigger { |v| midiSend !? _.(v) }
 }
 
+CWSysex : CWControl {
+    // map sysex to a handler function
+    var midiFunc;
 
-
+    *new { |devId, callback|
+        ^super.new().initSysex(devId, callback)
+    }
+    initSysex { |devId, callback|
+        if (devId.isNil.not) {
+            midiFunc = MIDIFunc.sysex(callback, devId);
+        };
+    }
+    free {
+        midiFunc.free;
+        midiFunc = nil;
+        super.free;
+    }
+}
