@@ -2,20 +2,18 @@ CWSelect : CWControl {
     // Selects one of several points to join with another point, based on the
     // value of yet a third point!
 
-    var selection, sync;
+    var selection;
 
-    *new { | commonPoint, selectorPoint, muxPoints, sync = true |
-        ^super.new().initSelect(commonPoint, selectorPoint, muxPoints, sync)
+    *new { | commonPoint, selectorPoint, muxPoints |
+        ^super.new().initSelect(commonPoint, selectorPoint, muxPoints)
     }
-    initSelect { | commonPoint, selectorPoint, muxPoints, syncOpt |
-        selection = 0;
-        sync = syncOpt;
-
+    initSelect { | commonPoint, selectorPoint, muxPoints |
         this.connect(commonPoint, \common);
         this.connect(selectorPoint);
         muxPoints.do { |p, i|
             this.connect(p, i);
         };
+        self.set(0);
     }
 
     receiveId { |id, msg, args|
@@ -25,7 +23,12 @@ CWSelect : CWControl {
         { id.isNil } { this.receive(msg, args); }
     }
 
-    set { |s| selection = s; if(sync) { this.sendTo(selection, \sync); }; }
+    set { |s|
+        if (selection != s) {
+            selection = s;
+            points.at(s) !? _.sync();
+        };
+    }
 }
 
 

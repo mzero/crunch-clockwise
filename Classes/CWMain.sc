@@ -162,12 +162,11 @@ ClockWise {
         );
     }
 
-    select { |commonPt, selectorPt, muxPts, sync = true|
+    select { |commonPt, selectorPt, muxPts|
         CWSelect(
             this.point(commonPt),
             this.point(selectorPt),
-            muxPts.collect ( this.point(_) ),
-            sync
+            muxPts.collect ( this.point(_) )
         );
     }
 
