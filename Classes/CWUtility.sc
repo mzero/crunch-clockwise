@@ -109,4 +109,3 @@ CWWarp : CWControl {
     toWarp { |b| this.sendTo(\warp, \set, warp.map(b)); }
     toBase { |w| this.sendTo(\base, \set, warp.unmap(w)); }
 }
-
