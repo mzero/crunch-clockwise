@@ -8,13 +8,12 @@ CWSelect : CWControl {
         ^super.new().initSelect(commonPoint, selectorPoint, muxPoints)
     }
     initSelect { | commonPoint, selectorPoint, muxPoints |
-        selection = 0;
-
         this.connect(commonPoint, \common);
         this.connect(selectorPoint);
         muxPoints.do { |p, i|
             this.connect(p, i);
         };
+        self.set(0);
     }
 
     receiveId { |id, msg, args|
@@ -24,7 +23,12 @@ CWSelect : CWControl {
         { id.isNil } { this.receive(msg, args); }
     }
 
-    set { |s| selection = s; }
+    set { |s|
+        if (selection != s) {
+            selection = s;
+            points.at(s) !? _.sync();
+        };
+    }
 }
 
 
