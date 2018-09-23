@@ -51,6 +51,11 @@ CWSane : CWControl {
         this.set(saneValue);
         this.send(\set, saneValue);
     }
+
+    resane { |v|
+        saneValue = v;
+    }
+
     sync {
         this.send(\set, lastValue);
     }

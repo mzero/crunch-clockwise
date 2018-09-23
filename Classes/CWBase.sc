@@ -59,6 +59,15 @@ CWPoint {
         ^nil
     }
 
+    hasResponder { |symbol|
+        connections.do { |conn|
+            if (conn[0].respondsTo(symbol)) {
+                ^true;
+            }
+        };
+        ^false
+    }
+
     // convience methods
     sane { ^this.performFirst(\sane) }
     sync { ^this.performFirst(\sync) }
