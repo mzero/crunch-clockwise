@@ -188,7 +188,6 @@ ClockWise {
         );
     }
 
-
     set { |pt, nv| points.at(pt) !? (_.distribute(\set, nv)) }
 
     sane { |pt| points.at(pt) !? (_.sane) }
