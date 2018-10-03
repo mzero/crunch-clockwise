@@ -1,14 +1,14 @@
 CWTempoClock : CWControl {
 	classvar midiClockBeats;
-	var clock, tempo, clockRoutine;
+	var clock, tempo, clockRoutine, playing;
 
 	*initClass {
 		midiClockBeats = 1/24;
 	}
-	*new { |tempoPoint, clockPoint, clock|
-		^super.new().initTempoClock(tempoPoint, clockPoint, clock)
+	*new { |tempoPoint, clockPoint, clock, startPlaying=true|
+		^super.new().initTempoClock(tempoPoint, clockPoint, clock, startPlaying)
 	}
-	initTempoClock { |tempoPoint, clockPoint, clockArg|
+	initTempoClock { |tempoPoint, clockPoint, clockArg, startPlaying|
 		clock = clockArg;
 		tempo = clock.tempo;
 
@@ -23,11 +23,19 @@ CWTempoClock : CWControl {
 				midiClockBeats.yield;
 			}
 		});
-		clockRoutine.play(clock, quant:1);
+		if(startPlaying) { this.play } { this.pause }
 	}
 	free {
 		clockRoutine.stop();
 		clock.removeDependant(this);
+	}
+	play {
+		playing = true;
+		clockRoutine.play(clock, quant:1);
+	}
+	pause {
+		playing = false;
+		clockRoutine.stop;
 	}
 
 	update { |obj, what ... args|
@@ -53,6 +61,10 @@ CWTempoClock : CWControl {
 		{ id == \clock } {
 			// This could slave the TempoClock to incoming MIDI RTC messages.
 			// But not now.
+		}
+
+		{ id == \trigger} {
+			if (playing) { this.pause } { this.play }
 		}
 	}
 }
