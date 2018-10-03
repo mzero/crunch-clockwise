@@ -98,6 +98,44 @@ CWRadioButton : CWButtonBase {
     }
 }
 
+CWToggleButton : CWButtonBase {
+    // Interprets a particular MIDI note as button to toggle the state of.
+    // The button is toggled when a velocity > 1 is received or when the CC value is > 1.
+    // Values of 0 are ignored.
+    // The state of the control will be reflected back as a vel 0 or 127.
+    //
+    // Unlike the CWRadioButton, this is intended for a single control which switches state.
+    // The point attached to this button will toggle between 0 (off) and 1 (on).
+
+    var active;
+
+    *new { |point, devId, midiOut, ch, note=nil, cc=nil, defaultEnabled=false |
+        ^super.new(point, devId, midiOut, ch, note, cc).initToggleButton(defaultEnabled)
+    }
+    initToggleButton { |active_|
+        active = active_;
+    }
+
+    buttonOn {
+        active = active.not;
+        this.send(\set, if(active, 1, 0));
+        this.outputButton(active);
+    }
+    buttonOff {
+        // Resend on so as to make sure the controller has the right state
+        // because controllers will turn the indicator light off when the
+        // button is released.
+        if (active) {
+            this.outputButton(true);
+        }
+    }
+
+    set { |v|
+        active = v > 0;
+        this.outputButton(active);
+    }
+}
+
 CWTriggerButton : CWButtonBase {
     // Interprets a particular MIDI note as a trigger.
 
@@ -119,4 +157,3 @@ CWTriggerButton : CWButtonBase {
 
     trigger { SystemClock.play(triggerRoutine.reset); }
 }
-
