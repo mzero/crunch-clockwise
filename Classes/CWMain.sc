@@ -39,7 +39,7 @@ ClockWise {
                 try {
 					MIDIIn.connect(i, ep)
 				} { |err|
-					if (err.isKindOf(PrimitiveFailedError)) 
+					if (err.isKindOf(PrimitiveFailedError))
 						{ "You can ignore that error message.".postln; }
 						{ err.throw; };
 				};
@@ -54,7 +54,7 @@ ClockWise {
 				try {
 					m.connect(ep.uid);
 				} { |err|
-					if (err.isKindOf(PrimitiveFailedError)) 
+					if (err.isKindOf(PrimitiveFailedError))
 						{ "You can ignore that error message.".postln; }
 						{ err.throw; };
 				};
@@ -147,11 +147,11 @@ ClockWise {
             ch);
     }
 
-    tempoClock { |tempoPt, clockPt, clock|
+    tempoClock { |tempoPt, clockPt, clock, startPlaying=true|
         CWTempoClock(
             this.point(tempoPt),
             this.point(clockPt),
-            clock);
+            clock, startPlaying);
     }
 
     midiClock { |pt, dev, inOnly=false, outOnly=false|
