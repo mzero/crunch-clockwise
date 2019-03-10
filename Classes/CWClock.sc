@@ -32,7 +32,7 @@ CWTempoClock : CWControl {
 
 	update { |obj, what ... args|
 		if (obj === clock && what === \tempo) {
-			var newTempo = args[0];
+			var newTempo = clock.tempo;
 			if (newTempo != tempo  &&  newTempo.isNil.not) {
 				tempo = newTempo;
 				this.sendTo(\tempo, \set, tempo);
