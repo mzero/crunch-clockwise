@@ -29,7 +29,7 @@ CWCc : CWControl {
             );
         };
         if (midiOut.isNil.not) {
-            midiSend = { |cv| midiOut.control(ch, cc, cv) };
+            midiSend = { |cv| midiOut.control(ch, cc, round(cv)) };
         };
 
         this.connect(point);
@@ -67,7 +67,7 @@ CWBend : CWControl {
             );
         };
         if (midiOut.isNil.not) {
-            midiSend = { |cv| midiOut.bend(ch, cv) };
+            midiSend = { |cv| midiOut.bend(ch, round(cv)) };
         };
 
         this.connect(point);
