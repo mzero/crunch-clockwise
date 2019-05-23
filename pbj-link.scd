@@ -262,15 +262,17 @@ if (~pbj.isNil.not) {
 			// BopPad Routing
 
 			cw.midiDevice(\bp, "BopPad");
-			cw.midiPerf(\perfDrum, \bp, inOnly:true);
-			cw.midiPerf(\perfDrum, \dt, 13, outOnly:true);
+
+			// the 1-4 & 5-8 presets go directly to DT at all times
+			cw.midiPerf(\perfDrum, \bp, 12, inOnly:true);
+			cw.midiPerf(\perfDrum, \dt, 0, outOnly:true);
+
+			// the pitched preset goes to the performance router
+			cw.midiPerf(\perfIn, \bp, 13, inOnly:true);
 
 			cw.midiProgram(\drumProg, \bp, 0, outOnly:true);
 			(1..3).do { |i|
-				cw.midiRadioButton(\drumProg, i, \ff, 12, note:(i-1+5));
-			};
-			(1..3).do { |i|
-				cw.midiRadioButton(\drumProg, i, \lp, 0, cc:(89-(10*(i-1+4))));
+				cw.midiRadioButton(\drumProg, i, \lp, 0, cc:(89-(10*(i-1))));
 			};
 			cw.saneValue(\drumProg, 3);
 
