@@ -264,6 +264,22 @@ if (~pbj.isNil.not) {
 			cw.midiPerf(\perfOut2, \dt, 10, inOnly:true);
 			cw.midiPerf(\perfOut3, \dt, 11, inOnly:true);
 
+			// BopPad Routing
+
+			cw.midiDevice(\bp, "BopPad");
+			cw.midiPerf(\perfDrum, \bp, inOnly:true);
+			cw.midiPerf(\perfDrum, \dt, 13, outOnly:true);
+
+			cw.midiProgram(\drumProg, \bp, 0, outOnly:true);
+			(1..3).do { |i|
+				cw.midiRadioButton(\drumProg, i, \ff, 12, note:(i-1+5));
+			};
+			(1..3).do { |i|
+				cw.midiRadioButton(\drumProg, i, \lp, 0, cc:(89-(10*(i-1+4))));
+			};
+			cw.saneValue(\drumProg, 3);
+
+
 			// Output meter
 			cw.midiRadioButton(\outMeter, -35.0, \ff, 12, note:8, outOnly:true, orGreater:true);
 			cw.midiRadioButton(\outMeter, -15.0, \ff, 12, note:9, outOnly:true, orGreater:true);

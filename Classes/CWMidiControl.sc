@@ -157,6 +157,7 @@ CWProgram : CWControl {
         super.free;
     }
 
+    set { |v| midiSend !? _.(v) }
     trigger { |v| midiSend !? _.(v) }
 }
 
