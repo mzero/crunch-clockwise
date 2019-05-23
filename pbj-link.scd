@@ -237,25 +237,27 @@ if (~pbj.isNil.not) {
 			cw.midiDevice(\mm, "MicroMonsta");
 			cw.midiDevice(\ps, "PiSound");
 
-			cw.midiPerf(\perfOut0, \mm, 8);
-			cw.midiPerf(\perfOut4, \dt, 13);
-
-			(0..4).do { |i|
-				cw.midiRadioButton(\perfSelect, i, \ff, 12, note:i);
+			(0..11).do { |i|
+			  var sym = "dtTrack%".format(i).asSymbol;
+			  cw.midiPerf(sym, \dt, i, outOnly:true);
 			};
-			(0..3).do { |i|
-				cw.midiRadioButton(\perfSelect, i, \lp, 0, cc:(89-(10*i)));
-			};
-			cw.midiRadioButton(\perfSelect, 4, \lp, 0, cc:98);
-			cw.saneValue(\perfSelect, 0);
 
+			cw.midiPerf(\mmDirect, \mm, 8, outOnly:true);
+
+			// Launchpad performance selector
+
+			(0..7).do { |i|
+				cw.midiRadioButton(\perfSelect, i, \lp, 0, cc:(i+1));
+			};
+			(8..11).do { |i|
+				cw.midiRadioButton(\perfSelect, i, \lp, 0, cc:(19+(10*(i-8))));
+			};
+			cw.midiRadioButton(\perfSelect, 12, \lp, 0, cc:10);
+
+			cw.saneValue(\perfSelect, 12);
 			cw.select(\perfIn, \perfSelect,
-				[\perfOut0, \perfOut1, \perfOut2, \perfOut3, \perfOut4]);
-
-			cw.midiPerf(\perfOut0, \dt, 8, inOnly:true);
-			cw.midiPerf(\perfOut1, \dt, 9, inOnly:true);
-			cw.midiPerf(\perfOut2, \dt, 10, inOnly:true);
-			cw.midiPerf(\perfOut3, \dt, 11, inOnly:true);
+				(0..11).collect({ |i| "dtTrack%".format(i).asSymbol }) ++ [\mmDirect]);
+			cw.midiPerf(\mmDirect, \dt, 8, inOnly:true);
 
 			// BopPad Routing
 
@@ -278,7 +280,6 @@ if (~pbj.isNil.not) {
 			cw.midiRadioButton(\outMeter, -15.0, \ff, 12, note:9, outOnly:true, orGreater:true);
 			cw.midiRadioButton(\outMeter,  -9.0, \ff, 12, note:10, outOnly:true, orGreater:true);
 			cw.midiRadioButton(\outMeter,  -3.0, \ff, 12, note:11, outOnly:true, orGreater:true);
-
 
 			// Synth Volume Levels
 
@@ -305,7 +306,6 @@ if (~pbj.isNil.not) {
 
 			cw.midiCC(\beat, \ff, 12, 122, unmapped:true, outOnly:true);
 			cw.midiTriggerButton(\sendStart, \ff, 12, note:122);
-			cw.midiTriggerButton(\sendStart, \lp, 0, cc:19);
 			cw.action(\sendStart, {
 				metro.playNextBar({
 					cw.point(\clock).distribute(\start);
