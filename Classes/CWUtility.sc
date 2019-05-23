@@ -24,7 +24,14 @@ CWSelect : CWControl {
         { id.isNil } { this.receive(msg, args); }
     }
 
-    set { |s| selection = s; }
+    set { |s|
+        if (selection != s) {
+            selection = s;
+            points.at(s) !? _.sync();
+        };
+     }
+
+
 }
 
 
