@@ -225,7 +225,6 @@ if (~pbj.isNil.not) {
 			// MIDI Performance Router
 
 			cw.midiDevice(\nk, "nanoKey");
-			cw.midiDevice(\du, "DuTouch");
 			cw.midiDevice(\lp, "Launchpad",
 				Platform.case(
 					\linux,       { "MIDI 2" },
@@ -234,17 +233,11 @@ if (~pbj.isNil.not) {
 
 			cw.midiPerf(\perfIn, \nk);
 			cw.midiPerf(\perfIn, \lp, 0);
-			cw.midiPerf(\perfIn, \du);
 
-			cw.midiDevice(\fm, "PreenFM");
 			cw.midiDevice(\mm, "MicroMonsta");
 			cw.midiDevice(\ps, "PiSound");
 
 			cw.midiPerf(\perfOut0, \mm, 8);
-			cw.midiPerf(\perfOut0, \fm, 8);
-			cw.midiPerf(\perfOut1, \fm, 9);
-			cw.midiPerf(\perfOut2, \fm, 10);
-			cw.midiPerf(\perfOut3, \fm, 11);
 			cw.midiPerf(\perfOut4, \dt, 13);
 
 			(0..4).do { |i|
@@ -286,20 +279,6 @@ if (~pbj.isNil.not) {
 			cw.midiRadioButton(\outMeter,  -9.0, \ff, 12, note:10, outOnly:true, orGreater:true);
 			cw.midiRadioButton(\outMeter,  -3.0, \ff, 12, note:11, outOnly:true, orGreater:true);
 
-			// Preen Instruments
-
-			(0..3).do { |i|
-				var ch = 9 - 1 + i;  // channels 9 ~ 12, numbered from 0
-
-				// performance parameters
-				(0..3).do { |p|
-					var perfSym = "fm-%-perf-%".format(i, p).asSymbol;
-					var perfCc = 115 + p;  // ccs 115 ~ 118
-					cw.midiCC(perfSym, \ff, ch, perfCc);
-					cw.midiCC(perfSym, \fm, ch, perfCc);
-					cw.saneValue(perfSym, 0.5);  // middle of the range
-				};
-			};
 
 			// Synth Volume Levels
 
@@ -307,7 +286,6 @@ if (~pbj.isNil.not) {
 				var sym = "synVol%".format(i).asSymbol;
 				cw.midiCC(sym, \ff, 12, i);  // faders 9 thru 12
 				cw.midiCC(sym, \mm, i, 7);   // standard volume CC
-				cw.midiCC(sym, \fm, i, 73);  // output volume CC on PreenFM
 				cw.saneValue(sym, 100/127);  // nominal volume level
 			};
 
@@ -315,7 +293,6 @@ if (~pbj.isNil.not) {
 
 			cw.tempoClock(\tempo, \clock, ~metro);
 			cw.midiClock(\clock, \dt, outOnly:true);
-			cw.midiClock(\clock, \fm, outOnly:true);
 			cw.midiClock(\clock, \mm, outOnly:true);
 			cw.midiClock(\clock, \ps, outOnly:true);
 
