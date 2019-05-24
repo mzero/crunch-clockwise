@@ -276,6 +276,13 @@ if (~pbj.isNil.not) {
 			};
 			cw.saneValue(\drumProg, 3);
 
+			// Digitakt Mutes
+			(0..7).do { |i|
+				var sym = "dtMute%".format(i).asSymbol;
+				cw.midiCC(sym, \dt, i, 94, unmapped:true);
+				cw.midiRadioButton(sym, 1, \ff, 12, note:i, toggle:0);
+				cw.saneValue(sym, 0);
+			};
 
 			// Output meter
 			cw.midiRadioButton(\outMeter, -35.0, \ff, 12, note:8, outOnly:true, orGreater:true);
