@@ -7,10 +7,10 @@ CWPerf : CWControl {
 
     var midiFuncs, midiOut, midiCh;
 
-    *new { |point, devId, midiOut, ch |
-        ^super.new().initPerf(point, devId, midiOut, ch )
+    *new { |point, devId, midiOut, ch, ccs=nil |
+        ^super.new().initPerf(point, devId, midiOut, ch, ccs )
     }
-    initPerf { |point, devId, out, ch |
+    initPerf { |point, devId, out, ch, ccs |
         if (devId.isNil) {
             midiFuncs = [];
         } {
@@ -22,7 +22,7 @@ CWPerf : CWControl {
                 MIDIFunc.touch     ( { |val|       this.send(\touch, val); }, ch, devId ),
                 MIDIFunc.bend      ( { |val|       this.send(\bend, val); }, ch, devId ),
             ]
-            ++ ([1, 7, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73].do { |ctl|
+            ++ ((ccs ? [1, 7, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73]).do { |ctl|
                 MIDIFunc.cc        ( { |val|       this.send(\control, ctl, val); }, ctl, ch, devId )
             });
         };

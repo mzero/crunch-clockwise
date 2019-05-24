@@ -232,7 +232,7 @@ if (~pbj.isNil.not) {
 			));
 
 			cw.midiPerf(\perfIn, \nk);
-			cw.midiPerf(\perfIn, \lp, 0);
+			cw.midiPerf(\perfIn, \lp, 0, ccs:[]);
 
 			cw.midiDevice(\mm, "MicroMonsta");
 			cw.midiDevice(\ps, "PiSound");

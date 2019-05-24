@@ -124,12 +124,12 @@ ClockWise {
             ch, note, cc);
     }
 
-    midiPerf { |pt, dev, ch=nil, inOnly=false, outOnly=false|
+    midiPerf { |pt, dev, ch=nil, inOnly=false, outOnly=false, ccs=nil|
         CWPerf(
             this.point(pt),
             this.getMidiIn(dev, skip:outOnly),
             this.getMidiOut(dev, skip:inOnly),
-            ch);
+            ch, ccs);
     }
 
     synthPerf { |pt, synth|
