@@ -67,23 +67,26 @@ CWRadioButton : CWButtonBase {
 
     // The button is set on when a velocity > 1 is received.
     // The state of the controll will be reflected back as a vel 0 or 127.
-    // Note: This kind of button cannot be "turned off" directly.
+    // If toggle is provided, then hitting the radio button again when on,
+	// will set the point to the toggle value.
 
-    var value, orGreater, active;
+    var value, orGreater, toggle, active;
 
-    *new { |point, value, devId, midiOut, ch, note=nil, cc=nil, orGreater=false|
+    *new { |point, value, devId, midiOut, ch, note=nil, cc=nil, orGreater=false, toggle=nil|
         ^super.new(point, devId, midiOut, ch, note, cc)
-            .initRadioButton(value, orGreater)
+            .initRadioButton(value, orGreater, toggle)
     }
-    initRadioButton { |value_, orGreater_|
+    initRadioButton { |value_, orGreater_, toggle_|
         value = value_;
         orGreater = orGreater_;
+		toggle = toggle_;
         active = false;
     }
 
     buttonOn {
-        active = true;
-        this.send(\set, value);
+		if (active && toggle.isNil.not)
+			{ active = false; this.send(\set, toggle); }
+			{ active = true;  this.send(\set, value); }
     }
     buttonOff {
         // Resend on so as to make sure the controller has the right state
