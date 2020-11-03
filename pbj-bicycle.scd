@@ -158,7 +158,7 @@ if (~pbj.isNil.not) {
 
 			cw.synthArg(\tempo);
 			cw.warp(\tempo, \bpm, mul:60);
-			cw.warp(\bpmCC, \bpm, mul:200, add:40);
+			cw.warp(\bpmCC, \bpm, mul:140, add:80);
 			cw.midiCC(\bpmCC, \nk, 15, 64, inOnly:true);
 
 			cw;
