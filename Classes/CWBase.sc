@@ -19,9 +19,20 @@ CWPoint {
     // echoed back.
 
     var connections;
+    var symbol;
 
-    *new { ^super.new().initPoint }
-    initPoint { connections = List(); }
+    classvar debugDepth;
+    var <>debug;
+
+    *initClass {
+        debugDepth = 0;
+    }
+    *new { |symbol| ^super.new().initPoint(symbol) }
+    initPoint { |s|
+        connections = List();
+        symbol = s;
+        debug = false;
+    }
     free {
         var connections_ = connections;
         connections = nil;
@@ -37,12 +48,28 @@ CWPoint {
     }
 
     distributeFrom { |fromCtl, msg, args=nil|
+        var d = debug || (debugDepth > 0);
+        if (d) {
+            debugDepth = debugDepth + 2;
+            "".padLeft(debugDepth).post;
+            "% distributing %(%)".postf(symbol, msg, args);
+            "".postln;
+            debugDepth = debugDepth + 2;
+        };
         connections.do { |conn|
             var ctl = conn[0], id = conn[1];
             if ((ctl === fromCtl).not)
             {
+                if (d) {
+                    "".padLeft(debugDepth).post;
+                    "-> %".postf(id);
+                    "".postln;
+                };
                 ctl.receiveId(id, msg, args);
             };
+        };
+        if (d) {
+            debugDepth = debugDepth - 4;
         };
     }
 

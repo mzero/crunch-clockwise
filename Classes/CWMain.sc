@@ -65,11 +65,13 @@ ClockWise {
 
     point { |symbol|
         ^points.atFail(symbol) {
-            var p = CWPoint();
+            var p = CWPoint(symbol);
             points.put(symbol, p);
             p
         }
     }
+
+    debug { |pt, on=true| this.point(pt).debug = on; }
 
     getMidiIn  { |dev, skip=false| ^if (skip, nil, { midiInIds.at(dev) }) }
     getMidiOut { |dev, skip=false| ^if (skip, nil, {  midiOuts.at(dev) }) }
