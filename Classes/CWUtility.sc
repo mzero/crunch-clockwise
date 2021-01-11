@@ -34,6 +34,34 @@ CWSelect : CWControl {
 
 }
 
+CWFunction : CWControl {
+    var funcArgs;
+    var func;
+
+    *new { | resultPoint, argPoints, func |
+        ^super.new().initFunction(resultPoint, argPoints, func)
+    }
+
+    initFunction  { | r, a, f |
+        funcArgs = a.collect(nil);
+        func = f;
+
+        this.connect(r);
+        a.do { |p, i|
+            this.connect(p, i);
+        };
+    }
+
+    receiveId { | id, msg, args |
+        if (id.isNil.not && (msg == \set)) {
+            var v;
+            funcArgs.put(id, args.at(0));
+            v = try { func.valueArray(funcArgs) } { nil };
+            v !? this.send(\set, _);
+        };
+    }
+}
+
 
 CWSane : CWControl {
     // Supplies a sane value, and keeps track of the last value, so can be

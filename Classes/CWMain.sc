@@ -172,6 +172,15 @@ ClockWise {
         );
     }
 
+    function { |resultPt, argPts, func|
+        CWFunction(
+            this.point(resultPt),
+            argPts.collect ( this.point(_) ),
+            func
+        );
+    }
+
+
     warp { |basePt, warpPt, spec=nil, mul=1, add=0|
         CWWarp(
             this.point(basePt),
